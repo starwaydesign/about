@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eljii · profile</title>
+  <!-- Font Awesome 6 (free) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Animate.css (light) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <!-- Three.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    /* ----- reset & base ----- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      color: #fff;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* canvas background */
+    #bg-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      display: block;
+      background: #000;
+    }
+
+    /* ----- containers / cards ----- */
+    .container {
+      max-width: 640px;
+      width: 100%;
+      perspective: 1000px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .profile-card,
+    .profile-card-2 {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 28px;
+      padding: 28px 24px;
+      margin-bottom: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+
+    .profile-card {
+      animation: cardEntry 0.9s ease-out;
+      transform-style: preserve-3d;
+    }
+
+    .profile-card:hover {
+      transform: translateZ(18px) rotateX(2deg);
+      border-color: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6);
+    }
+
+    @keyframes cardEntry {
+      0% { opacity: 0; transform: translateY(-30px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .profile-image {
+      width: 140px;
+      height: 140px;
+      margin: 0 auto 18px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 3px solid rgba(255, 255, 255, 0.15);
+      transition: transform 0.3s ease, border-color 0.3s;
+      animation: imagePulse 3s infinite ease-in-out;
+    }
+
+    @keyframes imagePulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.04); }
+      100% { transform: scale(1); }
+    }
+
+    .profile-image:hover {
+      transform: scale(1.08);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .profile-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    h1, h2 {
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-shadow: 0 0 12px rgba(255, 255, 255, 0.15);
+      margin-bottom: 6px;
+    }
+
+    h2 {
+      font-size: 1.9rem;
+    }
+
+    .bio {
+      color: rgba(255, 255, 255, 0.85);
+      line-height: 1.7;
+      font-size: 0.98rem;
+      text-align: left;
+      padding: 0 4px;
+    }
+
+    .bio .bold {
+      font-weight: 600;
+      color: #fff;
+      font-size: 1.1rem;
+      display: inline-block;
+      margin-top: 6px;
+    }
+
+    .bio b {
+      color: #f0f0f0;
+    }
+
+    /* ----- link cards (social) ----- */
+    .links-container {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 6px;
+    }
+
+    .link-card {
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      padding: 14px 18px;
+      border-radius: 16px;
+      text-decoration: none;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      transition: all 0.25s ease;
+      transform-style: preserve-3d;
+      position: relative;
+      overflow: hidden;
+      animation: linkFade 0.5s ease backwards;
+    }
+
+    .link-card:nth-child(1) { animation-delay: 0.05s; }
+    .link-card:nth-child(2) { animation-delay: 0.12s; }
+    .link-card:nth-child(3) { animation-delay: 0.19s; }
+    .link-card:nth-child(4) { animation-delay: 0.26s; }
+    .link-card:nth-child(5) { animation-delay: 0.33s; }
+
+    @keyframes linkFade {
+      0% { opacity: 0; transform: translateY(18px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .link-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+      transition: 0.5s;
+    }
+
+    .link-card:hover::before {
+      left: 100%;
+    }
+
+    .link-card:hover {
+      transform: translateZ(16px) scale(1.02);
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .link-card i {
+      font-size: 1.6rem;
+      width: 34px;
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+
+    .link-card:hover i {
+      transform: rotate(360deg) scale(1.1);
+    }
+
+    .link-card span {
+      font-size: 1.05rem;
+      font-weight: 450;
+      letter-spacing: 0.3px;
+      transition: transform 0.2s;
+    }
+
+    .link-card:hover span {
+      transform: translateX(4px);
+    }
+
+    .fa-instagram { color: #E4405F; filter: drop-shadow(0 0 6px rgba(228,64,95,0.3)); }
+    .fa-facebook { color: #1877F2; filter: drop-shadow(0 0 6px rgba(24,119,242,0.3)); }
+    .fa-tiktok { color: #fff; filter: drop-shadow(0 0 6px rgba(255,255,255,0.2)); }
+    .fa-youtube { color: #FF4500; filter: drop-shadow(0 0 6px rgba(255,69,0,0.3)); }
+    .fa-whatsapp { color: #25D366; filter: drop-shadow(0 0 6px rgba(37,211,102,0.3)); }
+
+    /* navigation buttons */
+    .nav-button {
+      display: inline-block;
+      padding: 12px 28px;
+      margin-top: 10px;
+      background: rgba(255, 255, 255, 0.06);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 40px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.25s ease;
+      backdrop-filter: blur(4px);
+      letter-spacing: 0.5px;
+      width: auto;
+      align-self: center;
+    }
+
+    .nav-button:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: scale(1.04);
+      border-color: rgba(255, 255, 255, 0.4);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+
+    /* ----- loading screen ----- */
+    .loading-screen {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+      transition: opacity 0.6s ease;
+    }
+
+    .loading-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 36px;
+    }
+
+    .typing-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tag-text {
+      font-size: 1.3rem;
+      letter-spacing: 1.5px;
+      font-weight: 450;
+      font-family: 'Courier New', monospace;
+      opacity: 0;
+      transform: translateY(16px);
+      background: linear-gradient(90deg, #f0f0f0, #c0c0c0, #e8e8e8, #ffffff, #b0b0b0, #f5f5f5);
+      background-size: 300% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: silverShine 4s linear infinite, fadeUp 0.5s forwards;
+      text-shadow: 0 0 6px rgba(255,255,255,0.1);
+    }
+
+    .tag-text:nth-child(1) { animation-delay: 0.2s; }
+    .tag-text:nth-child(2) { animation-delay: 0.6s; }
+    .tag-text:nth-child(3) { animation-delay: 1.0s; }
+    .tag-text:nth-child(4) { animation-delay: 1.4s; }
+    .tag-text:nth-child(5) { animation-delay: 1.8s; }
+
+    .tag-text span {
+      -webkit-text-fill-color: #e0e0e0;
+      opacity: 0.9;
+    }
+
+    @keyframes silverShine {
+      0% { background-position: 0% center; }
+      100% { background-position: 300% center; }
+    }
+
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .loader {
+      width: 52px;
+      height: 52px;
+      border: 4px solid rgba(255,255,255,0.06);
+      border-top: 4px solid #fff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      box-shadow: 0 0 20px rgba(255,255,255,0.05);
+      position: relative;
+      transition: opacity 0.4s;
+    }
+
+    .loader::before,
+    .loader::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      border: 4px solid transparent;
+    }
+    .loader::before {
+      inset: -10px;
+      border-top-color: rgba(200,200,200,0.25);
+      animation: spin 2.4s linear infinite;
+    }
+    .loader::after {
+      inset: 6px;
+      border-top-color: rgba(255,255,255,0.4);
+      animation: spin 1.6s linear infinite reverse;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .start-button {
+      margin-top: 12px;
+      padding: 12px 34px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 60px;
+      font-size: 1.1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.25s;
+      color: #fff;
+      -webkit-text-fill-color: #fff;
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(4px);
+      letter-spacing: 1px;
+    }
+
+    .start-button:hover {
+      background: rgba(255,255,255,0.14);
+      border-color: rgba(255,255,255,0.5);
+      transform: scale(1.03);
+    }
+
+    /* utility */
+    .fade-out { opacity: 0; }
+
+    /* responsive */
+    @media (max-width: 500px) {
+      .profile-card, .profile-card-2 { padding: 20px 16px; }
+      h2 { font-size: 1.6rem; }
+      .bio { font-size: 0.92rem; }
+      .profile-image { width: 110px; height: 110px; }
+      .link-card { padding: 12px 14px; gap: 12px; }
+      .link-card i { font-size: 1.3rem; width: 28px; }
+      .link-card span { font-size: 0.95rem; }
+      .tag-text { font-size: 1.0rem; }
+      .nav-button { padding: 10px 20px; font-size: 0.95rem; }
+    }
+
+    @media (max-width: 380px) {
+      .profile-image { width: 90px; height: 90px; }
+      .tag-text { font-size: 0.85rem; }
+      .link-card span { font-size: 0.85rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- audio (autoplay) -->
+  <audio id="bg-music" src="song.mp3" autoplay loop></audio>
+
+  <!-- Three.js canvas -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- LOADING SCREEN -->
+  <div id="loading-screen" class="loading-screen">
+    <div class="loading-content">
+      <div class="loader" id="loader-el"></div>
+      <div class="typing-container">
+        <div class="tag-text"><span>RIZKY NUR ALIEF</span></div>
+        <div class="tag-text"><span>&lt;</span>Graphic Design<span>.</span>&gt;</div>
+        <div class="tag-text"><span>&lt;</span>Video Editor<span>.</span>&gt;</div>
+        <div class="tag-text"><span>&lt;</span>Digital Creator<span>.</span>&gt;</div>
+        <div class="tag-text"><span>&lt;</span>Entrepreneur<span>.</span>&gt;</div>
+        <div id="start-btn" class="start-button">↻ tap to start</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT (page 1) -->
+  <div class="container" id="content" style="display: none;">
+    <div class="profile-card">
+      <div class="profile-image">
+        <img src="profile.jpg" alt="Rizky profile">
+      </div>
+      <h2>RIZKY NUR ALIEF</h2>
+    </div>
+
+    <div class="profile-card-2">
+      <div class="bio">
+        <p>"Seorang profesional kreatif dengan passion mendalam pada visual storytelling. Berbekal pengalaman sebagai editor di industri marketing, saya memadukan keahlian teknis, struktur narasi yang kuat, dan kepekaan visual untuk meracik konten video pendek yang memikat dan berdampak. Khususnya dalam format seperti Instagram Reels, saya berfokus menciptakan alur cerita yang dinamis dan autentik—memastikan audiens terpaku dari hook pertama hingga resolusi akhir.</p>
+        <br>
+        <b class="bold">✨ Graphic Desain & Video Editor</b>
+        <p> Sebagai Editor  dengan pengalaman di industri advertising, saya bertanggung jawab dalam mengelola seluruh proses pascaproduksi untuk kampanye digital. Peran ini meliputi penyusunan struktur narasi yang memikat untuk konten video pendek, seperti Instagram Reels, dengan menerapkan teknik storytelling yang kuat (hook, orientation, conflict, dan resolution) guna memaksimalkan retensi audiens. Saya memastikan setiap visual sejalan dengan strategi pemasaran perusahaan. Selain itu, saya berperan penting dalam menerjemahkan brief kreatif menjadi cerita visual yang dinamis, mengatur ritme (pacing) video agar tidak membosankan, dan memastikan kualitas akhir materi promosi dapat meningkatkan engagement serta brand awareness."</p>
+        <br>
+        <b class="bold">✨ Digital Creator</b>
+        <p>"Pada Juli 2026, saya melangkah sebagai Digital Creator dengan membawa pengalaman dari dunia marketing dan video editing. Saya percaya perempuan kreatif memiliki banyak sisi: cerdas secara strategi, kuat dalam storytelling, dan luwes dalam berekspresi. Dari meracik hook yang memikat hingga resolusi yang berkesan, saya di sini untuk menciptakan konten yang menghibur, memberdayakan, dan bermakna. ✨"</p>
+      </div>
+      <div class="links-container" style="margin-top: 10px;">
+        <button id="nextBtn" class="nav-button">NEXT →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECOND PAGE (socials) -->
+  <div class="container" id="content-2" style="display: none;">
+    <div class="links-container">
+      <a href="https://www.instagram.com/" class="link-card" target="_blank">
+        <i class="fab fa-instagram"></i>
+        <span>Instagram</span>
+      </a>
+      <a href="https://www.facebook.com" class="link-card" target="_blank">
+        <i class="fab fa-facebook"></i>
+        <span>Facebook</span>
+      </a>
+      <a href="https://www.tiktok.com/" class="link-card" target="_blank">
+        <i class="fab fa-tiktok"></i>
+        <span>TikTok</span>
+      </a>
+      <a href="https://youtube.com/" class="link-card" target="_blank">
+        <i class="fab fa-youtube"></i>
+        <span>YouTube</span>
+      </a>
+      <a href="https://wa.me/6289630063584" class="link-card" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+        <span>For Business / inquiries</span>
+      </a>
+
+      <!-- second profile image (decorative) -->
+      <div class="profile-card" style="margin-top: 8px; padding: 16px;">
+        <div class="profile-image" style="width: 120px; height: 120px;">
+          <img src="profile2.jpg" alt="Rizky second">
+        </div>
+      </div>
+
+      <button id="backBtn" class="nav-button" style="margin-top: 4px;">← BACK</button>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      // ----- Three.js background (particles) -----
+      try {
+        const canvas = document.getElementById('bg-canvas');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        const particleCount = 4200;
+        const positions = new Float32Array(particleCount * 3);
+        for (let i = 0; i < particleCount * 3; i++) {
+          positions[i] = (Math.random() - 0.5) * 6;
+        }
+
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+        const mat = new THREE.PointsMaterial({
+          size: 0.006,
+          color: '#ffffff',
+          transparent: true,
+          opacity: 0.75,
+          blending: THREE.AdditiveBlending,
+        });
+
+        const particles = new THREE.Points(geo, mat);
+        scene.add(particles);
+        camera.position.z = 2.2;
+
+        let mouseX = 0, mouseY = 0;
+        document.addEventListener('mousemove', (e) => {
+          mouseX = (e.clientX / window.innerWidth) - 0.5;
+          mouseY = (e.clientY / window.innerHeight) - 0.5;
+        });
+
+        function animateParticles() {
+          requestAnimationFrame(animateParticles);
+          particles.rotation.y += 0.0008;
+          particles.rotation.x += 0.0004;
+          camera.position.x += (mouseX * 0.4 - camera.position.x) * 0.04;
+          camera.position.y += (-mouseY * 0.4 - camera.position.y) * 0.04;
+          renderer.render(scene, camera);
+        }
+        animateParticles();
+
+        window.addEventListener('resize', () => {
+          camera.aspect = window.innerWidth / window.innerHeight;
+          camera.updateProjectionMatrix();
+          renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+      } catch (_) {
+        // fallback: if Three.js fails, body bg is black (default)
+        document.body.style.background = '#0a0a0a';
+      }
+
+      // ----- UI logic -----
+      const startBtn = document.getElementById('start-btn');
+      const loadingScreen = document.getElementById('loading-screen');
+      const mainContent = document.getElementById('content');
+      const secondContent = document.getElementById('content-2');
+      const music = document.getElementById('bg-music');
+
+      // start button: hide loading, show main
+      startBtn.addEventListener('click', () => {
+        // try to play audio (autoplay may be blocked)
+        music.play().catch(() => {});
+        loadingScreen.style.opacity = '0';
+        setTimeout(() => {
+          loadingScreen.style.display = 'none';
+          mainContent.style.display = 'block';
+        }, 550);
+      });
+
+      // navigation: next / back
+      document.getElementById('nextBtn').addEventListener('click', () => {
+        mainContent.style.display = 'none';
+        secondContent.style.display = 'block';
+        // re-trigger link animation (optional)
+      });
+
+      document.getElementById('backBtn').addEventListener('click', () => {
+        secondContent.style.display = 'none';
+        mainContent.style.display = 'block';
+      });
+
+      // auto fade loader after 2.5s (cosmetic)
+      setTimeout(() => {
+        const loader = document.querySelector('.loader');
+        if (loader) loader.classList.add('fade-out');
+      }, 2500);
+    })();
+  </script>
+</body>
+</html>
